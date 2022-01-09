@@ -15,7 +15,7 @@ public class NMSUtils {
 
     static {
         Map<String, Callable<NMSWrapper>> versionMap = new HashMap<>();
-        versionMap.put("net.minecraft.server.v1_16_R3.WorldServer", NMSWrapper_v1_16_R3::new);
+        versionMap.put("net.minecraft.server.v1_18_R1.WorldServer", NMSWrapper_v1_18_R1::new);
 
         for (String className : versionMap.keySet()) {
             try {
