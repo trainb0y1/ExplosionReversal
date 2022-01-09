@@ -2,7 +2,7 @@ package net.starlegacy.explosionreversal;
 
 import net.starlegacy.explosionreversal.data.ExplodedBlockData;
 import net.starlegacy.explosionreversal.data.ExplodedEntityData;
-import net.starlegacy.explosionreversal.nms.NMSUtils;
+import net.starlegacy.explosionreversal.nms.NMSWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -14,6 +14,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Painting;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -22,12 +23,12 @@ import java.util.logging.Logger;
 public class Regeneration {
     private static final Logger logger = Logger.getLogger(Regeneration.class.getName());
 
-    public static void pulse(ExplosionReversalPlugin plugin) {
+    public static void pulse(ExplosionReversalPlugin plugin) throws IOException {
         regenerateBlocks(plugin, false);
         regenerateEntities(plugin, false);
     }
 
-    public static int regenerateBlocks(ExplosionReversalPlugin plugin, boolean instant) {
+    public static int regenerateBlocks(ExplosionReversalPlugin plugin, boolean instant) throws IOException {
         long millisecondDelay = (long) (plugin.getSettings().getRegenDelay() * 60L * 1_000L);
         long maxNanos = (long) (plugin.getSettings().getPlacementIntensity() * 1_000_000L);
 
@@ -60,18 +61,18 @@ public class Regeneration {
         return regenerated;
     }
 
-    private static void regenerateBlock(World world, ExplodedBlockData data) {
+    private static void regenerateBlock(World world, ExplodedBlockData data) throws IOException {
         Block block = world.getBlockAt(data.getX(), data.getY(), data.getZ());
         BlockData blockData = data.getBlockData();
         block.setBlockData(blockData, false);
 
         @Nullable byte[] tileData = data.getTileData();
         if (tileData != null) {
-            NMSUtils.setTileEntity(block, tileData);
+            NMSWrapper.completeSetTileEntity(block, tileData);
         }
     }
 
-    public static int regenerateEntities(ExplosionReversalPlugin plugin, boolean instant) {
+    public static int regenerateEntities(ExplosionReversalPlugin plugin, boolean instant) throws IOException {
         long millisecondDelay = (long) (plugin.getSettings().getRegenDelay() * 60L * 1_000L);
         int regenerated = 0;
 
@@ -91,7 +92,7 @@ public class Regeneration {
         return regenerated;
     }
 
-    private static void regenerateEntity(World world, ExplodedEntityData data) {
+    private static void regenerateEntity(World world, ExplodedEntityData data) throws IOException {
         Location location = new Location(world, data.getX(), data.getY(), data.getZ(), data.getPitch(), data.getYaw());
 
         EntityType entityType = data.getEntityType();
@@ -107,7 +108,7 @@ public class Regeneration {
 
         @Nullable byte[] nmsData = data.getNmsData();
         if (nmsData != null) {
-            NMSUtils.restoreEntityData(entity, nmsData);
+            NMSWrapper.completeRestoreEntityData(entity, nmsData);
         }
 
         if (entity instanceof LivingEntity) {

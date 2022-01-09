@@ -1,10 +1,11 @@
 package net.starlegacy.explosionreversal.data;
 
-import net.starlegacy.explosionreversal.nms.NMSUtils;
+import net.starlegacy.explosionreversal.nms.NMSWrapper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 
 public class ExplodedEntityData {
     private final EntityType entityType;
@@ -29,10 +30,10 @@ public class ExplodedEntityData {
         this.nmsData = nmsData;
     }
 
-    public ExplodedEntityData(Entity entity, long explosionTime) {
+    public ExplodedEntityData(Entity entity, long explosionTime) throws IOException {
         this(entity.getType(), entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ(),
                 entity.getLocation().getPitch(), entity.getLocation().getYaw(),
-                explosionTime, NMSUtils.getEntityData(entity));
+                explosionTime, NMSWrapper.completeGetEntityData(entity));
     }
 
     public EntityType getEntityType() {

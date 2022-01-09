@@ -11,6 +11,7 @@ import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
@@ -41,14 +42,30 @@ public class ExplosionReversalPlugin extends JavaPlugin implements Listener {
 
     private void scheduleRegen() {
         BukkitScheduler scheduler = getServer().getScheduler();
-        scheduler.runTaskTimer(this, () -> Regeneration.pulse(this), 5L, 5L);
+        scheduler.runTaskTimer(this, () -> {
+            try {
+                Regeneration.pulse(this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }, 5L, 5L);
     }
 
     private void registerCommands() {
         Objects.requireNonNull(getCommand("regen")).setExecutor((sender, command, label, args) -> {
             long start = System.nanoTime();
-            int regeneratedBlocks = Regeneration.regenerateBlocks(this, true);
-            int regeneratedEntities = Regeneration.regenerateEntities(this, true);
+            int regeneratedBlocks = 0;
+            try {
+                regeneratedBlocks = Regeneration.regenerateBlocks(this, true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            int regeneratedEntities = 0;
+            try {
+                regeneratedEntities = Regeneration.regenerateEntities(this, true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             long elapsed = System.nanoTime() - start;
 
             String seconds = new BigDecimal(elapsed / 1_000_000_000.0)
