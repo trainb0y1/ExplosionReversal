@@ -3,19 +3,20 @@ package net.starlegacy.explosionreversal.nms;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Objects;
 
-public class NMSWrapper_v1_16_R3 implements NMSWrapper {
+public class NMSWrapper_v1_18_R1 implements NMSWrapper {
     @SuppressWarnings("UnstableApiUsage")
-    private byte[] serialize(NBTTagCompound nbt) throws IOException {
+    private byte[] serialize(CompoundTag nbt) throws IOException {
         ByteArrayDataOutput output = ByteStreams.newDataOutput();
         NBTCompressedStreamTools.a(nbt, output);
 
@@ -23,7 +24,7 @@ public class NMSWrapper_v1_16_R3 implements NMSWrapper {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private NBTTagCompound deserialize(byte[] bytes) throws IOException {
+    private CompoundTag deserialize(byte[] bytes) throws IOException {
         ByteArrayDataInput input = ByteStreams.newDataInput(bytes);
         NBTReadLimiter readLimiter = new NBTReadLimiter(bytes.length * 10);
         return NBTCompressedStreamTools.a(input, readLimiter);
@@ -44,14 +45,14 @@ public class NMSWrapper_v1_16_R3 implements NMSWrapper {
     private byte[] completeGetTileEntity(Block block) throws Exception {
         WorldServer worldServer = ((CraftWorld) block.getWorld()).getHandle();
 
-        BlockPosition blockPosition = new BlockPosition(block.getX(), block.getY(), block.getZ());
+        BlockPos blockPosition = new BlockPos(block.getX(), block.getY(), block.getZ());
 
         TileEntity tileEntity = worldServer.getTileEntity(blockPosition);
         if (tileEntity == null) {
             return null;
         }
 
-        NBTTagCompound nbt = tileEntity.save(new NBTTagCompound());
+        CompoundTag nbt = tileEntity.save(new CompoundTag());
 
         return serialize(nbt);
     }
@@ -67,9 +68,9 @@ public class NMSWrapper_v1_16_R3 implements NMSWrapper {
     private void completeSetTileEntity(Block block, byte[] bytes) throws IOException {
         WorldServer worldServer = ((CraftWorld) block.getWorld()).getHandle();
 
-        BlockPosition blockPosition = new BlockPosition(block.getX(), block.getY(), block.getZ());
+        BlockPos blockPosition = new BlockPos(block.getX(), block.getY(), block.getZ());
 
-        NBTTagCompound nbt = deserialize(bytes);
+        CompoundTag nbt = deserialize(bytes);
 
         IBlockData blockData = worldServer.getType(blockPosition);
 
@@ -96,8 +97,8 @@ public class NMSWrapper_v1_16_R3 implements NMSWrapper {
     }
 
     private byte[] completeGetEntityData(Entity entity) throws IOException {
-        net.minecraft.server.v1_16_R3.Entity nmsEntity = getNMSEntity(entity);
-        NBTTagCompound nbt = nmsEntity.save(new NBTTagCompound());
+        net.minecraft.server.v1_18_R1.Entity nmsEntity = getNMSEntity(entity);
+        CompoundTag nbt = nmsEntity.save(new CompoundTag());
         return serialize(nbt);
     }
 
@@ -110,8 +111,8 @@ public class NMSWrapper_v1_16_R3 implements NMSWrapper {
     }
 
     private void completeRestoreEntityData(Entity entity, byte[] entityData) throws IOException {
-        net.minecraft.server.v1_16_R3.Entity nmsEntity = getNMSEntity(entity);
-        NBTTagCompound nbt = deserialize(entityData);
+        net.minecraft.server.v1_18_R1.Entity nmsEntity = getNMSEntity(entity);
+        CompoundTag nbt = deserialize(entityData);
         nmsEntity.load(nbt);
     }
 }
