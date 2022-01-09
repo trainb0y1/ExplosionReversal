@@ -31,7 +31,7 @@ public class NMSWrapper_v1_18_R1 implements NMSWrapper {
     @SuppressWarnings("UnstableApiUsage")
     private CompoundTag deserialize(byte[] bytes) throws IOException {
         ByteArrayDataInput input = ByteStreams.newDataInput(bytes);
-        NbtAccounter readLimiter = new NbtAccounter(bytes.length * 10);
+        NbtAccounter readLimiter = new NbtAccounter(bytes.length * 10L);
         return NbtIo.read(input, readLimiter);
     }
 
@@ -52,12 +52,12 @@ public class NMSWrapper_v1_18_R1 implements NMSWrapper {
 
         BlockPos blockPosition = new BlockPos(block.getX(), block.getY(), block.getZ());
 
-        BlockEntity tileEntity = worldServer.getTileEntity(blockPosition);
+        BlockEntity tileEntity = worldServer.getBlockEntity(blockPosition);
         if (tileEntity == null) {
             return null;
         }
 
-        CompoundTag nbt = tileEntity.save(new CompoundTag());
+        CompoundTag nbt = tileEntity.saveWithFullMetadata();
 
         return serialize(nbt);
     }
@@ -77,13 +77,9 @@ public class NMSWrapper_v1_18_R1 implements NMSWrapper {
 
         CompoundTag nbt = deserialize(bytes);
 
-        BlockState blockData = worldServer.getType(blockPosition);
+        BlockState blockData = worldServer.getBlockState(blockPosition);
 
-        BlockEntity tileEntity = Objects.requireNonNull(BlockEntity.create(blockData, nbt));
-        tileEntity.setPosition(blockPosition);
-
-        worldServer.removeTileEntity(blockPosition);
-        worldServer.setTileEntity(blockPosition, tileEntity);
+        BlockEntity tileEntity = BlockEntity.loadStatic(blockPosition, blockData, nbt);
     }
 
     private net.minecraft.world.entity.Entity getNMSEntity(Entity entity) {
