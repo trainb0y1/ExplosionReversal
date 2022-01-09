@@ -29,7 +29,7 @@ public class NMSUtils {
         }
 
         if (nmsWrapper == null) {
-            logger.info("No NMS adapter found! Tile entities and entities won't regenerate properly.");
+            logger.warning("No NMS adapter found! Tile entities and entities won't regenerate properly.");
         }
     }
 
